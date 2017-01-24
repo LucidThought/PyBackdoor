@@ -90,6 +90,16 @@ def server_listener(clientSocket,server):
             except:
                 output = "file doesn't exist\nusage: $cat <filename>\n"
                 output = output.encode()
+        elif 'ps' in bashCommand:
+            if len(bash_args) == 2:
+                output = subprocess.check_output(['ps',bash_args[1]])
+            elif len(bash_args) == 1:
+                output = subprocess.check_output(['ps'])
+            else:
+                output = "usage: $ps OR $ps <process command>\n"
+                output += "examples: $ps\n$ps aux\n"
+                output = output.encode()
+
         elif bashCommand == 'off':
             server.shutdown(1)
             server.close()
