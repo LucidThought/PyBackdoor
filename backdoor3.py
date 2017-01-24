@@ -35,24 +35,25 @@ def server_connector():
     # the server
     server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     server.bind((HOST, PORT))
-    server.listen(1)  ## only need to allow 1 client connection
+    server.listen(5)  ## only need to allow 1 client connection
     print("Waiting for socket connection at " + HOST + ":" + str(PORT))
 
     while True:
         clientSocket, addr = server.accept()
         print("NC Client has connected via" + addr[0] + ":" + str(addr[1]))
-        server_listener(clientSocket)
+        server_listener(clientSocket,server)
 
 
 ## this function deals with netcat commands from client connection
-def server_listener(clientSocket):
+def server_listener(clientSocket,server):
     while True:
         clientSocket.send(bytearray("Welcome Boss: \n","utf-8"))
         bashCommand = ''
         while "\n" not in bashCommand:
             bashCommand = clientSocket.recv(1024).decode()
         bashCommand = bashCommand.rstrip()
-        print("Client Entered: " + bashCommand)
+        bash_args = bashCommand.split()
+        #print("Client Entered: " + bashCommand)
 
         if(bashCommand =='pwd'):
             print("pwd was entered")
@@ -60,6 +61,13 @@ def server_listener(clientSocket):
             output = subprocess.check_output(['pwd'])
         elif(bashCommand =='ls'):
             output = subprocess.check_output(['ls'])
+
+        elif ( ('cat' in bashCommand ) & ( len(bash_args) == 2) ):
+            output = "cat doing some cool stuff\n".encode()
+        elif bashCommand == 'off':
+            server.shutdown(1)
+            server.close()
+            sys.exit()
         else:
             output = "Not a valid bash command \n".encode()
 
