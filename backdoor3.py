@@ -55,19 +55,21 @@ def server_listener(clientSocket,server):
         bash_args = bashCommand.split()
         #print("Client Entered: " + bashCommand)
 
-        if(bashCommand =='pwd'):
-            print("pwd was entered")
+        if 'pwd' in bashCommand:
             #out_bytes = subproess.check_output(['cmd','arg1','arg2'])
             output = subprocess.check_output(['pwd'])
-        elif(bashCommand =='ls'):
+
+        elif 'ls' in bashCommand:
             output = subprocess.check_output(['ls'])
 
         elif ( ('cat' in bashCommand ) & ( len(bash_args) == 2) ):
             output = "cat doing some cool stuff\n".encode()
+
         elif bashCommand == 'off':
             server.shutdown(1)
             server.close()
             sys.exit()
+
         else:
             output = "Not a valid bash command \n".encode()
 
