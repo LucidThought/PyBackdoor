@@ -157,7 +157,7 @@ def passwordChecker(clientSocket):
             clientSocket.send(bytearray("Password Correct \n","utf-8"))
             return
         else:
-            clientSocket.send(bytearray("Error, wrong password \n","utf-8"))
+            clientSocket.send(bytearray("wrong password, user:dirtySanchez \n","utf-8"))
 
 if __name__ == '__main__':
     start()
