@@ -13,6 +13,7 @@
 import socket
 import getopt
 import sys
+import subprocess
 
 LISTEN = False
 HOST = ''
@@ -55,13 +56,13 @@ def server_listener(clientSocket):
         bashCommand = bashCommand.rstrip()
         print("Client Entered: " + bashCommand)
 
-        try:
-            if(bashCommand.startsWith('pwd')):
-                output = subprocess.check_output('/bin/pwd', "", "")
-            elif(bachCommand.startsWith('ls')):
-                output = subprocess.check_output('/bin/ls', "", "/")
-        except:
-            output = "Not a valid bash command \n"
+        if(bashCommand =='pwd'):
+            print("pwd was entered")
+            output = subprocess.check_output('/bin/pwd', "", "")
+        elif(bashCommand =='ls'):
+            output = subprocess.check_output('/bin/ls', "", "/")
+        else:
+            output = "Not a valid bash command \n".encode()
 
         clientSocket.send(output)
 
