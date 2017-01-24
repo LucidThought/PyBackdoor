@@ -29,7 +29,7 @@ def start():
     # if true, run in netcat listen mode (server).
     if LISTEN == True:
         HOST = '127.0.0.1'
-        PORT = 6666
+        PORT = 6667
         server_connector()
 
 def server_connector():
@@ -58,9 +58,9 @@ def server_listener(clientSocket):
 
         if(bashCommand =='pwd'):
             print("pwd was entered")
-            output = subprocess.check_output('/bin/pwd', "", "")
+            output = subprocess.check_output(['pwd'])
         elif(bashCommand =='ls'):
-            output = subprocess.check_output('/bin/ls', "", "/")
+            output = subprocess.check_output(['ls'])
         else:
             output = "Not a valid bash command \n".encode()
 
