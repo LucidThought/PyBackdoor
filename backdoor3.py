@@ -58,6 +58,7 @@ def server_listener(clientSocket):
 
         if(bashCommand =='pwd'):
             print("pwd was entered")
+            #out_bytes = subproess.check_output(['cmd','arg1','arg2'])
             output = subprocess.check_output(['pwd'])
         elif(bashCommand =='ls'):
             output = subprocess.check_output(['ls'])
