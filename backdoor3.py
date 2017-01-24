@@ -72,39 +72,16 @@ def server_listener(clientSocket,server):
             output = PWD
 #            print("rfind: %i", output.decode().rindex('/'))
         elif ('cd' in bashCommand):
-            if (bash_args[1].rstrip() == ".."):
-                last = PWD.decode().rindex('/')
-                if(last==0):
-                    PWD = "/".encode()
-                    output = "/".encode()
-                else:
-                    temp = PWD.decode()[:last]
-                    PWD = temp.encode()
-                    output = PWD
-            else:
-                print(bash_args[1])
-                PWD = (PWD.decode().rstrip() + '/' + bash_args[1]).encode()
-                output = PWD
+           output = cd_function(bash_args)
+            
         elif ('ls' in bashCommand):
             output = subprocess.check_output(['ls', PWD.decode()])
+
         elif ( ('cat' in bashCommand ) & ( len(bash_args) == 2) ):
-            try:
-                print(bash_args[1])
-                buffer = ""
-                buffer += open(bash_args[1]).read()
-                output = buffer.encode()
-            except:
-                output = "file doesn't exist\nusage: $cat <filename>\n"
-                output = output.encode()
+            output = cat_function(bash_args)
+
         elif 'ps' in bashCommand:
-            if len(bash_args) == 2:
-                output = subprocess.check_output(['ps',bash_args[1]])
-            elif len(bash_args) == 1:
-                output = subprocess.check_output(['ps'])
-            else:
-                output = "usage: $ps OR $ps <process command>\n"
-                output += "examples: $ps\n$ps aux\n"
-                output = output.encode()
+            output = ps_function(bash_args)
 
         elif bashCommand == 'off':
             off_function()
@@ -112,6 +89,53 @@ def server_listener(clientSocket,server):
             output = "Not a valid bash command \n".encode()
 
         clientSocket.send(output)
+
+def cd_function(bash_args):
+    global PWD
+    if (bash_args[1].rstrip() == ".."):
+        last = PWD.decode().rindex('/')
+        if(last==0):
+            PWD = "/".encode()
+            output = "/".encode()
+        else:
+            temp = PWD.decode()[:last]
+            PWD = temp.encode()
+            output = PWD
+    else:
+        print(bash_args[1])
+        PWD = (PWD.decode().rstrip() + '/' + bash_args[1]).encode()
+        output = PWD
+    return output
+
+def cat_function(bash_args):
+    global PWD
+    try:
+        print(bash_args[1])
+        buffer = ""
+        buffer += open(PWD.decode() + "/" + bash_args[1]).read()
+        output = buffer.encode()
+    except:
+        output = "file doesn't exist\nusage: $cat <filename>\n"
+        output = output.encode()
+    return output
+
+def ps_function(bash_args):
+    
+    if len(bash_args) == 2:
+        output = subprocess.check_output(['ps',bash_args[1]])
+    elif len(bash_args) == 1:
+        output = subprocess.check_output(['ps'])
+    else:
+        output = "usage: $ps OR $ps <process command>\n"
+        output += "examples: $ps\n$ps aux\n"
+        output = output.encode()
+    return output
+
+def off_function():
+    
+    server.shutdown(1)
+    server.close()
+    sys.exit()
 
 def passwordChecker(clientSocket):
     
@@ -134,13 +158,6 @@ def passwordChecker(clientSocket):
             return
         else:
             clientSocket.send(bytearray("Error, wrong password \n","utf-8"))
-
-def off_function():
-    
-    server.shutdown(1)
-    server.close()
-    sys.exit()
-
 
 if __name__ == '__main__':
     start()
