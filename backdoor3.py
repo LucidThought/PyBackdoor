@@ -76,7 +76,7 @@ def server_connector():
 ## this function deals with netcat commands from client connection
 def server_listener(clientSocket):
     while True:
-        clientSocket.send(bytearray("Welcome Boss: \n"))
+        clientSocket.send(bytearray("Welcome Boss: \n","utf-8"))
         bashCommand = ''
         while "\n" not in bashCommand:
             bashCommand += clientSocket.recv(1024)
@@ -84,8 +84,10 @@ def server_listener(clientSocket):
         print("Client Entered: " + bashCommand)
 
         try:
-            output = subprocess.check_output(bashCommand, stderr=subprocess.STDOUT, \
-                                             shell=True)
+            if(bashCommand.startsWith('pwd')):
+                output = subprocess.check_output('/bin/pwd', stderr=subprocess.STDOUT, shell=True)
+            elif(bachCommand.startsWith('ls')):
+                output = subprocess.check_output('/bin/ls', stderr=subprocess.STDOUT, shell=True)
         except:
             output = "Not a valid bash command \n"
 
