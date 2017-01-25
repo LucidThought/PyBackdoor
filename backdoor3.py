@@ -63,7 +63,7 @@ def server_listener(clientSocket):
         except:
             output = "Not a valid bash command \n"
 
-        clientSocket.send(output)
+        clientSocket.send(output.encode())
 
 
 if __name__ == '__main__':
