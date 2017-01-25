@@ -14,50 +14,22 @@ import socket
 import getopt
 import sys
 
-# Sample usage
-# get opts makes it easier to parse the program arguments
-# backdoor.py -l -p 2017 -c     creates the backdoor listen server
-# nc localhost 2017
-# the client connecting to server (and to see a shell to run commands).
-
-
 LISTEN = False
 HOST = ''
 PORT = 0
-SHELL_COMMAND = ''
 
 
 def start():
     global LISTEN
     global HOST
     global PORT
-    global SHELL_COMMAND
 
-    ## this is not working here, hard coded in port
-    ## need to read documentation on get opt agan
-    myopts, args = getopt.getopt(sys.argv[1:], "l:h:p")
-    # o == option
-    # a == argument
-    for o, a in myopts:
-        if o == '-l':
-            LISTEN = True  # set the listen (server) flag
-        # elif o == '-h':
-        #    HOST = a
-        elif o == '-p':
-            PORT = a
-
-    print("the port")
-    print(PORT)
+    LISTEN = True
     # if true, run in netcat listen mode (server).
     if LISTEN == True:
-        HOST = '0.0.0.0'
-        PORT = 9700
+        HOST = '127.0.0.1'
+        PORT = 6666
         server_connector()
-
-
-        # if false, run in netcat client mode
-        # if LISTEN == False:
-
 
 def server_connector():
     # Create a simple waiting loop for clients to connect to
