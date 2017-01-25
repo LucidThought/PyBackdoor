@@ -57,13 +57,13 @@ def server_listener(clientSocket):
 
         try:
             if(bashCommand.startsWith('pwd')):
-                output = subprocess.check_output('/bin/pwd', stderr=subprocess.STDOUT, shell=True)
+                output = subprocess.check_output('/bin/pwd', "", "")
             elif(bachCommand.startsWith('ls')):
-                output = subprocess.check_output('/bin/ls', stderr=subprocess.STDOUT, shell=True)
+                output = subprocess.check_output('/bin/ls', "", "/")
         except:
             output = "Not a valid bash command \n"
 
-        clientSocket.send(output.encode())
+        clientSocket.send(output)
 
 
 if __name__ == '__main__':
