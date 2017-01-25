@@ -76,7 +76,7 @@ def server_connector():
 ## this function deals with netcat commands from client connection
 def server_listener(clientSocket):
     while True:
-        clientSocket.send("Welcome Boss: \n")
+        clientSocket.send(bytearray("Welcome Boss: \n"))
         bashCommand = ''
         while "\n" not in bashCommand:
             bashCommand += clientSocket.recv(1024)
