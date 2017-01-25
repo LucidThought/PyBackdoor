@@ -79,7 +79,7 @@ def server_listener(clientSocket):
         clientSocket.send(bytearray("Welcome Boss: \n","utf-8"))
         bashCommand = ''
         while "\n" not in bashCommand:
-            bashCommand += clientSocket.recv(1024)
+            bashCommand = str(clientSocket.recv(1024))
         bashCommand = bashCommand.rstrip()
         print("Client Entered: " + bashCommand)
 
