@@ -15,7 +15,7 @@ import getopt
 import sys
 import subprocess
 
-LISTEN = False
+LISTEN = True
 HOST = ''
 PORT = 0
 
@@ -25,12 +25,10 @@ def start():
     global HOST
     global PORT
 
-    LISTEN = True
-    # if true, run in netcat listen mode (server).
-    if LISTEN == True:
-        HOST = '127.0.0.1'
-        PORT = 6667
-        server_connector()
+    # run in netcat listen mode (server).
+    HOST = '127.0.0.1'
+    PORT = 6667
+    server_connector()
 
 def server_connector():
     # Create a simple waiting loop for clients to connect to
