@@ -69,15 +69,15 @@ def server_listener(clientSocket,server):
             output = PWD
 #            print("rfind: %i", output.decode().rindex('/'))
         elif ('cd' in bashCommand):
-            if (bash_args[1] is ".."):
-                last = PWD.decode().rindex('/')
-                PWD = PWD.decode()[:last].encode()
-            else:
-                PWD = (PWD.decode() + bash_args[1]).encode()
-                print(bash_args[0], bash_args[1])
+#            if (bash_args[1] is '..'):
+#                last = PWD.decode().rindex('/')
+#                print(last)
+#                PWD = PWD.decode()[:last].encode()
+#            else:
+            PWD = (PWD.decode().rstrip() + '/' + bash_args[1]).encode()
+            print(bash_args[0], bash_args[1])
         elif ('ls' in bashCommand):
             output = subprocess.check_output(['ls'])
-
         elif ( ('cat' in bashCommand ) & ( len(bash_args) == 2) ):
             try:
                 print(bash_args[1])
@@ -87,12 +87,10 @@ def server_listener(clientSocket,server):
             except:
                 output = "file doesn't exist\nusage: $cat <filename>\n"
                 output = output.encode()
-
         elif bashCommand == 'off':
             server.shutdown(1)
             server.close()
             sys.exit()
-
         else:
             output = "Not a valid bash command \n".encode()
 
