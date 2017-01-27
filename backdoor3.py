@@ -54,26 +54,27 @@ def server_connector():
 
 ## this function deals with netcat commands from client connection
 def server_listener(clientSocket,server):
+    global PWD
     while True:
         clientSocket.send(bytearray("\n$","utf-8"))
         bashCommand = ''
         while "\n" not in bashCommand:
             bashCommand = clientSocket.recv(1024).decode()
         bashCommand = bashCommand.rstrip()
-        bash_args = bashCommand.split(' ')
+        bash_args = bashCommand.split()
         #print("Client Entered: " + bashCommand)
 
         if ('pwd' in bashCommand):
             #out_bytes = subproess.check_output(['cmd','arg1','arg2'])
             output = PWD
 #            print("rfind: %i", output.decode().rindex('/'))
-        elif (bash_args[0] is "cd"):
+        elif ('cd' in bashCommand):
             if (bash_args[1] is ".."):
                 last = PWD.decode().rindex('/')
-                PWD = PWD[:last]
+                PWD = PWD.decode()[:last].encode()
             else:
-                PWD = PWD + bash_args[1]
-                print(PWD)
+                PWD = (PWD.decode() + bash_args[1]).encode()
+                print(bash_args[0], bash_args[1])
         elif ('ls' in bashCommand):
             output = subprocess.check_output(['ls'])
 
