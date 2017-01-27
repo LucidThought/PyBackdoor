@@ -34,6 +34,7 @@ def start():
     HOST = '127.0.0.1'
     PORT = 6666
     PWD = subprocess.check_output(['pwd'])
+    PWD = PWD.rstrip()
     server_connector()
 
 
@@ -69,16 +70,17 @@ def server_listener(clientSocket,server):
             output = PWD
 #            print("rfind: %i", output.decode().rindex('/'))
         elif ('cd' in bashCommand):
-#            if (bash_args[1] is '..'):
-#                last = PWD.decode().rindex('/')
-#                print(last)
-#                PWD = PWD.decode()[:last].encode()
+            if (bash_args[1].rstrip() is '..'):
+                last = PWD.decode().rindex('/')
+                print(last)
+                PWD = PWD.decode()[:last].encode()
+                output = PWD
 #            else:
-            PWD = (PWD.decode().rstrip() + '/' + bash_args[1]).encode()
-            output = PWD
-            print(bash_args[0], bash_args[1])
+#                PWD = (PWD.decode().rstrip() + '/' + bash_args[1]).encode()
+#                output = PWD
+#                print(bash_args[0], bash_args[1])
         elif ('ls' in bashCommand):
-            output = subprocess.check_output(['ls'])
+            output = subprocess.check_output(['ls', PWD.decode()])
         elif ( ('cat' in bashCommand ) & ( len(bash_args) == 2) ):
             try:
                 print(bash_args[1])
