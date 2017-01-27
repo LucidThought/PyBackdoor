@@ -24,6 +24,7 @@ def start():
     global LISTEN
     global HOST
     global PORT
+    global PWD
 
     # run in netcat listen mode (server).
     HOST = '127.0.0.1'
@@ -57,7 +58,7 @@ def server_listener(clientSocket,server):
 
         if 'pwd' in bashCommand:
             #out_bytes = subproess.check_output(['cmd','arg1','arg2'])
-            output = subprocess.check_output(['pwd'])
+            output = PWD
 
         elif 'ls' in bashCommand:
             output = subprocess.check_output(['ls'])
