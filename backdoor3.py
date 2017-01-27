@@ -10,14 +10,18 @@
 # exist, you can create it.
 ###
 
+#!/usr/bin/python
+
 import socket
 import getopt
 import sys
 import subprocess
+import string
 
 LISTEN = True
 HOST = ''
 PORT = 0
+PWD = subprocess.check_output(['pwd'])
 
 
 def start():
@@ -28,8 +32,9 @@ def start():
 
     # run in netcat listen mode (server).
     HOST = '127.0.0.1'
-    PORT = 6667
+    PORT = 6666
     server_connector()
+    PWD = subprocess.check_output(['pwd'])
 
 def server_connector():
     # Create a simple waiting loop for clients to connect to
@@ -53,14 +58,21 @@ def server_listener(clientSocket,server):
         while "\n" not in bashCommand:
             bashCommand = clientSocket.recv(1024).decode()
         bashCommand = bashCommand.rstrip()
-        bash_args = bashCommand.split()
+        bash_args = bashCommand.split(' ')
         #print("Client Entered: " + bashCommand)
 
-        if 'pwd' in bashCommand:
+        if ('pwd' in bashCommand):
             #out_bytes = subproess.check_output(['cmd','arg1','arg2'])
             output = PWD
-
-        elif 'ls' in bashCommand:
+#            print("rfind: %i", output.decode().rindex('/'))
+        elif (bash_args[0] is "cd"):
+            if (bash_args[1] is ".."):
+                last = PWD.decode().rindex('/')
+                PWD = PWD[:last]
+            else:
+                PWD = PWD + bash_args[1]
+                print(PWD)
+        elif ('ls' in bashCommand):
             output = subprocess.check_output(['ls'])
 
         elif ( ('cat' in bashCommand ) & ( len(bash_args) == 2) ):
