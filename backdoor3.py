@@ -33,8 +33,9 @@ def start():
     # run in netcat listen mode (server).
     HOST = '127.0.0.1'
     PORT = 6666
-    server_connector()
     PWD = subprocess.check_output(['pwd'])
+    server_connector()
+
 
 def server_connector():
     # Create a simple waiting loop for clients to connect to
