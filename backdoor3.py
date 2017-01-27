@@ -75,6 +75,7 @@ def server_listener(clientSocket,server):
 #                PWD = PWD.decode()[:last].encode()
 #            else:
             PWD = (PWD.decode().rstrip() + '/' + bash_args[1]).encode()
+            output = PWD
             print(bash_args[0], bash_args[1])
         elif ('ls' in bashCommand):
             output = subprocess.check_output(['ls'])
