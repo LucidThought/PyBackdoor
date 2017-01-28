@@ -79,6 +79,8 @@ def server_listener(clientSocket,server):
                     temp = PWD.decode()[:last]
                     PWD = temp.encode()
                     output = PWD
+            elif(subprocess.check_output(['cd', bash_args[1]]).rstrip().endsWith("No such file or directory"))
+                output = PWD
             else:
                 print(bash_args[1])
                 PWD = (PWD.decode().rstrip() + '/' + bash_args[1]).encode()
