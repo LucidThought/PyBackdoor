@@ -70,15 +70,19 @@ def server_listener(clientSocket,server):
             output = PWD
 #            print("rfind: %i", output.decode().rindex('/'))
         elif ('cd' in bashCommand):
-#            if (bash_args[1].rstrip() is '..'):
-#                last = PWD.decode().rindex('/')
-#                print(last)
-#                PWD = PWD.decode()[:last].encode()
-#                output = PWD
-#            else:
-             PWD = (PWD.decode().rstrip() + '/' + bash_args[1]).encode()
-             output = PWD
-#                print(bash_args[0], bash_args[1])
+            if (bash_args[1].rstrip() == ".."):
+                last = PWD.decode().rindex('/')
+                if(last==0):
+                    PWD = "/".encode()
+                    output = "/".encode()
+                else:
+                    temp = PWD.decode()[:last]
+                    PWD = temp.encode()
+                    output = PWD
+            else:
+                print(bash_args[1])
+                PWD = (PWD.decode().rstrip() + '/' + bash_args[1]).encode()
+                output = PWD
         elif ('ls' in bashCommand):
             output = subprocess.check_output(['ls', PWD.decode()])
         elif ( ('cat' in bashCommand ) & ( len(bash_args) == 2) ):
