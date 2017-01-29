@@ -65,12 +65,9 @@ def server_listener(clientSocket,server):
             bashCommand = clientSocket.recv(1024).decode()
         bashCommand = bashCommand.rstrip()
         bash_args = bashCommand.split()
-        #print("Client Entered: " + bashCommand)
 
         if ('pwd' in bashCommand):
-            #out_bytes = subproess.check_output(['cmd','arg1','arg2'])
             output = PWD
-#            print("rfind: %i", output.decode().rindex('/'))
         elif ('cd' in bashCommand):
            output = cd_function(bash_args)
             
@@ -84,7 +81,7 @@ def server_listener(clientSocket,server):
             output = ps_function(bash_args)
 
         elif bashCommand == 'off':
-            off_function()
+            off_function(server)
         else:
             output = "Not a valid bash command \n".encode()
 
@@ -92,6 +89,10 @@ def server_listener(clientSocket,server):
 
 def cd_function(bash_args):
     global PWD
+    try:
+        test = subprocess.check_output([bash_args[0], bash_args[1]]).decode().rstrip()
+    except:
+        return "That's not a real folder...".encode()
     if (bash_args[1].rstrip() == ".."):
         last = PWD.decode().rindex('/')
         if(last==0):
@@ -101,6 +102,9 @@ def cd_function(bash_args):
             temp = PWD.decode()[:last]
             PWD = temp.encode()
             output = PWD
+    elif (bash_args[1].startswith("/")):
+        PWD = bash_args[1].encode()
+        output = bash_args[1].encode()
     else:
         print(bash_args[1])
         PWD = (PWD.decode().rstrip() + '/' + bash_args[1]).encode()
@@ -131,7 +135,7 @@ def ps_function(bash_args):
         output = output.encode()
     return output
 
-def off_function():
+def off_function(server):
     
     server.shutdown(1)
     server.close()
