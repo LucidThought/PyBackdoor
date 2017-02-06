@@ -78,7 +78,7 @@ def server_listener(clientSocket,server):
            output = cd_function(bash_args)
             
         elif ('ls' in bashCommand):
-            output = subprocess.check_output(['ls', PWD.decode()])
+            output = subprocess.check_output(['ls', '-al', PWD.decode()])
 
         elif ( ('cat' in bashCommand ) & ( len(bash_args) == 2) ):
             output = cat_function(bash_args)
@@ -96,7 +96,10 @@ def server_listener(clientSocket,server):
 def cd_function(bash_args):
     global PWD
     try:
-        test = subprocess.check_output([bash_args[0], bash_args[1]]).decode().rstrip()
+        if (bash_args[1].startswith("/")):
+            test = subprocess.check_output(['ls', bash_args[1]]).decode().rstrip()
+        else:
+            test = subprocess.check_output(['ls', (PWD.decode().rstrip() + '/' + bash_args[1])]).decode().rstrip()
     except:
         return "That's not a real folder...".encode()
     if (bash_args[1].rstrip() == ".."):
