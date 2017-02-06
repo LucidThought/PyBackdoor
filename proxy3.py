@@ -45,7 +45,7 @@ def server_listen():
   clients_connected = 0
   server_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
   server_sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR,1)
-  server_sock.bind((SRC_HOST,SRC_PORT)
+  server_sock.bind((SRC_HOST,SRC_PORT))
   server_sock.listen(5)
   print("Waiting for socket connection at " + SRC_HOST + ":" + str(SRC_PORT))
   
@@ -56,10 +56,10 @@ def server_listen():
     print("Client unknowingly connected to the 666 proxy")
     # need a print statement to show the clients IP address
 
-    threading.Thread(target = 666proxyListener,args = (clientSock,addr))
+    threading.Thread(target = proxy666Listener,args = (clientSock,addr))
     
 
-def 666proxyListener(clientSock,addr)
+def proxy666Listener(clientSock,addr):
   buf_size = 4096
   while True:
     try:
