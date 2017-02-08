@@ -21,7 +21,12 @@ PROXY_HOST = ''
 DST_HOST = ''
 LOG_MODE = 0
 
-def start():
+
+# void main ( no arg )
+# Description:
+# main of program, is responsible for reading command line arguments and starting
+# the proxy server.
+def main():
 
   global PROXY_PORT
   global DST_PORT
@@ -29,35 +34,56 @@ def start():
   global DST_HOST
   global LOG_MODE
 
-  PROXY_HOST = 'localhost' #server_host
+  PROXY_HOST = 'localhost' #server_host, always localhost.
 
   if len(sys.argv) == 5 or len(sys.argv) == 4:
+
     if len(sys.argv) == 5:
       log_command = str(sys.argv[1])
-      #set Log mode function here   
+      set_log_mode(log_command)
       PROXY_PORT = int(sys.argv[2])
       DST_HOST = str(sys.argv[3])
       DST_PORT  = int(sys.argv[4])
       LOG_MODE = 1  #hard coding raw here regardless of what -arg is entered
-    print("Port logger -raw mode enabled: srcPort= host= dstPort=")
+    
     if len(sys.argv) == 4:
       PROXY_PORT = int(sys.argv[1])
       DST_HOST = str(sys.argv[2])
       DST_PORT  = int(sys.argv[3])
       LOG_MODE = 0  
 
+    print("Port logger running: srcPort="+str(PROXY_PORT)+ " host="+DST_HOST+" dstPort="+str(DST_PORT)+"\n")
     start_proxy_server()
     
   else:
     print("wrong number of program arguments")
 
+def set_log_mode(log_command):
+  if log_command == "-raw":
+    mode = 1
+    print("-raw mode logging enabled")
+  if log_command == "-strip":
+    mode = 2
+    print("-strip mode logging enabled")
+  if log_command == "-hex":
+    mode = 3
+    print("-hex mode logging enabled")
+  if log_command == "-autoN":
+    mode = 4
+    print("-autoN mode logging enabled")
+
+# void method: start_proxy_server( no args ):
+# Description:
+# Starts the TCP proxy server, and listens for incoming socket connections.
+# For each client that connects, spawn a new client socket connection and client_connect
+# thread using that client socket connection. Listens for an unlimited # of connections
 def start_proxy_server():
 
   server_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
   server_sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR,1)
   server_sock.bind((PROXY_HOST,PROXY_PORT))
-  server_sock.listen(5)
-  print("Waiting for client(s) to connect at: "+PROXY_HOST+":"+str(PROXY_PORT))
+  server_sock.listen(10)
+  #print( "Waiting for client(s) to connect at: "+PROXY_HOST+":"+str(PROXY_PORT) )
   
   while True:
 
@@ -65,78 +91,105 @@ def start_proxy_server():
     client_ip = str(addr[0])
     client_port = str(addr[1])
     client_ip,client_port = str(addr[0]),str(addr[1])
-    print(client_ip + ':' + client_port + ' has connected')
-    Thread(target=client_connect, args=(clientSock,client_ip,client_port)).start()
+    print("New Connection: " + "Date & Time, From " + client_ip + ':' + client_port)
+    Thread( target=proxy_listener, args=(clientSock,client_ip,client_port) ).start()
 
-def client_connect(clientSock,client_ip,client_port):
+# void client_connect( arg1=socket,arg2=string,arg3=int )
+# Description:
+# This is the primary listener function for the proxy server, listens for TCP data
+# packets from the client socket, and TCP data packets from the dest server socket
+# and logs the data for each respective TCP packet.
+def proxy_listener(clientSock,client_ip,client_port):
 
-  #get client data from clientSock TCP connection
-  buff_size = 4096
-  client_request = clientSock.recv(buff_size)
-
-  try:
-    dest_server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    dest_server_socket.connect((DST_HOST,DST_PORT))
-    mode = 0
-    log_request(client_request,mode)
-
-    #Send original client request to server for response
-    dest_server_socket.send(client_request)
+  dest_server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+  dest_server_socket.connect((DST_HOST,DST_PORT))
   
-    while True:
-      
-      #get response from remote server
-      response_data = dest_server_socket.recv(buff_size)
+  client_request = b'' #this specifies byte string
+  server_response = b'' #this specifies byte string
 
-      #if server responded with response, log, and 
-      #relay this back to the connected client
-      if len(response_data) > 0:
-        
-        mode = 1
-        clientSock.send(response_data)
-        # THIS will show the response from server, but can't 
-        # figure out how to extract the header only!
-        #log_request(response_data,mode)
+  while True:
 
-      else:
+    client_request = get_data(clientSock) #returns a byte string
+    symbol = 0
 
-        print("client disconnected from server")
-        break
+    if len(client_request) > 0: #if client_request has data
+      symbol = 1
+      log_request( client_request, symbol ) 
+      dest_server_socket.send(client_request)
 
-    #close connection because no data was sent from server
-    dest_server_socket.close()
-    clientSock.close()
+    server_response = get_data(dest_server_socket) #returns a byte string
 
-  except:
-    #print("some error raised")
-    #print("Closing all connections")
-    clientSock.close()
-    dest_server_socket.close()
-    sys.exit(1)
+    if len(server_response) > 0: # if server_response has data
+      symbol = 2
+ 
+      log_request( client_request , symbol )
+      clientSock.send(server_response)
 
-def log_request(client_request,mode):
+    if not len(server_response) or not len(client_request):
+     clientSock.close()
+     dest_server_socket.close()
+     break
+
+# void log_request( arg1=byteString of data)
+# Description:
+# Helper function that logs packets to and from the proxy server.
+def log_request(data,mode):
   
   global LOG_MODE
-  
-  if mode == 0: #client request
-    symbol = "--->"
-  if mode == 1: #server response
-    symbol = "<---"
+
+  if mode == 0: #no data
+    symbol = "" 
+  if mode == 1: #client request
+    symbol = "---> "
+  if mode == 2: #server response
+    symbol = "<--- "
 
   if LOG_MODE == 1: #RAW MODE
-    print(symbol)
-    print(client_request)
-    # HOW TO EXTRACT JUST THE TCP HEADER????????????? grrrr
+    # OLD BUG HERE, If you don't "ignore" for error code argument
+      # an unicode error will crash the program if ignore is left out
+      # server responds with some unicode (byte characters) characters that can't be
+      # converted into string. You may need to change this when printing out in 
+      # the other modes? https://docs.python.org/3/howto/unicode.html very useful page
+      # only if your converting from UNI Code (byte string) to string
+    print( symbol + str(data,'utf-8',"ignore") )
 
   elif LOG_MODE == 2:
     print("Port logger -strip mode not implemented")
+    # Not implemented yet
+
   elif LOG_MODE == 3:
     print("Port logger -hex mode not implemented")
+    # Not Implemented yet
+
   elif LOG_MODE == 4:
     print("Port logger -AutoN mode not implemented")
+    # Not implemented yet    
+
+# client_connect( arg1=socket), returns byte String (Unicode)
+# Description:
+# helper function, recieves data from either client socket, or dest server, keeps
+# looping until the socket has no more data to recieve, sometimes has more then 4096
+def get_data(socket):
+
+    buff_size = 4096
+    time_out = 5
+    ####### BUG found out here, need to convert the data to a 
+    ####### byte string by putting b before it.
+    ####### convert this later to regular string if need be.
+    data_buffer = b''
+    socket.settimeout(5)
+    try:
+        while True:
+            data = socket.recv(4096)
+            if not data:
+                break
+            data_buffer += data
+    except:
+        pass
+    return data_buffer
 
 if __name__ == "__main__":
-  start()
+  main()
 
   
 
