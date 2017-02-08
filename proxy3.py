@@ -1,110 +1,139 @@
-# HOW TO USE
-# throw open a terminal, run program as follows
-# ex
-# $python proxy3.py -raw 2001 www.ucalgary.ca 80
-# open web browser, and set proxy to localhost port:2001
-# now all GET requests are transmitted via proxy to
-# web browsr
+#!/usr/bin/python3
 
-#!/usr/bin/python
+# HOW TO USE
+# 1. Launch server
+#    $python3 proxy3.py -raw <port> www.google.ca 80 
+#    OR $python3 proxy3.py <port> www.google.ca 80
+# 2.Open firefox setting -> advanced -> network ->settings ->set manual proxy:
+#   <port from above>, server: localhost
+# now all client requests are relayed and logged through this proxy server
+# can handle TCP requests such as: http, netcat, and ssh.
 
 import socket
 import getopt
 import sys
 import string
-import thread
-#ex
+from threading import Thread
 
-SRC_PORT = 0
+PROXY_PORT = 0
 DST_PORT = 0
-SRC_HOST = ''
+PROXY_HOST = ''
 DST_HOST = ''
-LOG_MODE = 0  #log print mode, raw is default
+LOG_MODE = 0
 
 def start():
 
-  global SRC_PORT
+  global PROXY_PORT
   global DST_PORT
-  global SRC_HOST
+  global PROXY_HOST
   global DST_HOST
   global LOG_MODE
 
-  SRC_HOST = 'localhost' #localhost
-  arg_length = len(sys.argv)
+  PROXY_HOST = 'localhost' #server_host
 
-  if arg_length == 5:
-    log_command = str(sys.argv[1])
-    #create function to set the log mode based on cmd line arg
-    LOG_MODE = 0
-    SRC_PORT = int(sys.argv[2])
-    DST_HOST = str(sys.argv[3])
-    DST_PORT  = int(sys.argv[4])
-    print(SRC_PORT)
-    print(SRC_HOST)
-    server_listen()
+  if len(sys.argv) == 5 or len(sys.argv) == 4:
+    if len(sys.argv) == 5:
+      log_command = str(sys.argv[1])
+      #set Log mode function here   
+      PROXY_PORT = int(sys.argv[2])
+      DST_HOST = str(sys.argv[3])
+      DST_PORT  = int(sys.argv[4])
+      LOG_MODE = 1  #hard coding raw here regardless of what -arg is entered
+    print("Port logger -raw mode enabled: srcPort= host= dstPort=")
+    if len(sys.argv) == 4:
+      PROXY_PORT = int(sys.argv[1])
+      DST_HOST = str(sys.argv[2])
+      DST_PORT  = int(sys.argv[3])
+      LOG_MODE = 0  
+
+    start_proxy_server()
     
   else:
     print("wrong number of program arguments")
 
+def start_proxy_server():
 
-#this function waits for clients to connect to the proxy
-    #start a new proxy listener thread for each client that connects
-    #to the server
-def server_listen():
-  
-  clients_connected = 0
   server_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
   server_sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR,1)
-  server_sock.bind((SRC_HOST,SRC_PORT))
+  server_sock.bind((PROXY_HOST,PROXY_PORT))
   server_sock.listen(5)
-  print("Waiting for socket connection at " + SRC_HOST + ":" + str(SRC_PORT))
+  print("Waiting for client(s) to connect at: "+PROXY_HOST+":"+str(PROXY_PORT))
   
   while True:
+
     clientSock, addr = server_sock.accept()
-    clientSock.settimeout(60) #times out after 60 seconds
-    clients_connected += 1 #increase counter
-    print("Client unknowingly connected to the 666 proxy")
-    # need a print statement to show the clients IP address
+    client_ip = str(addr[0])
+    client_port = str(addr[1])
+    client_ip,client_port = str(addr[0]),str(addr[1])
+    print(client_ip + ':' + client_port + ' has connected')
+    Thread(target=client_connect, args=(clientSock,client_ip,client_port)).start()
 
-    thread.start_new_thread(proxy666Listener, (clientSock,addr))
-    
+def client_connect(clientSock,client_ip,client_port):
 
-def proxy666Listener(clientSock,addr):
-
-  print("Port logger running: srcPort= host= dstPort=")
+  #get client data from clientSock TCP connection
   buff_size = 4096
-  request_data = clientSock.recv(buff_size)
+  client_request = clientSock.recv(buff_size)
 
   try:
+    dest_server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    dest_server_socket.connect((DST_HOST,DST_PORT))
+    mode = 0
+    log_request(client_request,mode)
 
-    print("connection to web server: " + DST_HOST)
-    dest_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    dest_socket.connect((DST_HOST,DST_PORT))
-    request_data_array = request_data.split('n')
-    print(request_data_array[0])
-    # NEED log function to output request data to log (aka console)
+    #Send original client request to server for response
+    dest_server_socket.send(client_request)
+  
+    while True:
+      
+      #get response from remote server
+      response_data = dest_server_socket.recv(buff_size)
+
+      #if server responded with response, log, and 
+      #relay this back to the connected client
+      if len(response_data) > 0:
+        
+        mode = 1
+        clientSock.send(response_data)
+        # THIS will show the response from server, but can't 
+        # figure out how to extract the header only!
+        #log_request(response_data,mode)
+
+      else:
+
+        print("client disconnected from server")
+        break
+
+    #close connection because no data was sent from server
+    dest_server_socket.close()
+    clientSock.close()
 
   except:
-    print("debug error: cannot open that socket.")
-    if clientSock:
-      clientSock.close()
-    print("proxy 6666 closing program and kill connection")
+    #print("some error raised")
+    #print("Closing all connections")
+    clientSock.close()
+    dest_server_socket.close()
     sys.exit(1)
 
-  dest_socket.send(request_data)
+def log_request(client_request,mode):
   
-  while True:
-    response_data = dest_socket.recv(buff_size)
+  global LOG_MODE
+  
+  if mode == 0: #client request
+    symbol = "--->"
+  if mode == 1: #server response
+    symbol = "<---"
 
-    if response_data:
-      # NEED log function to output request data to log (aka console)
-      clientSock.send(response_data)
-    else:
-      print("client disconnected from server")
-      break
-  dest_socket.close()
-  clientSock.close()
+  if LOG_MODE == 1: #RAW MODE
+    print(symbol)
+    print(client_request)
+    # HOW TO EXTRACT JUST THE TCP HEADER????????????? grrrr
 
+  if LOG_MODE == 2:
+    print("Port logger -strip mode not implemented")
+  if LOG_MODE == 3:
+    print("Port logger -hex mode not implemented")
+  if LOG_MODE == 4:
+    print("Port logger -AutoN mode not implemented")
 
 if __name__ == "__main__":
   start()
