@@ -128,11 +128,11 @@ def log_request(client_request,mode):
     print(client_request)
     # HOW TO EXTRACT JUST THE TCP HEADER????????????? grrrr
 
-  if LOG_MODE == 2:
+  elif LOG_MODE == 2:
     print("Port logger -strip mode not implemented")
-  if LOG_MODE == 3:
+  elif LOG_MODE == 3:
     print("Port logger -hex mode not implemented")
-  if LOG_MODE == 4:
+  elif LOG_MODE == 4:
     print("Port logger -AutoN mode not implemented")
 
 if __name__ == "__main__":
