@@ -58,7 +58,7 @@ def main():
   else:
     print("wrong number of program arguments")
 
-# void method: set_log_mode( arg1=string )
+# void set_log_mode( arg1=string )
 # Description:
 # helper function to set the proxy log mode.
 def set_log_mode(log_command):
@@ -75,7 +75,7 @@ def set_log_mode(log_command):
     mode = 4
     print("-autoN mode logging enabled")
 
-# void method: start_proxy_server( no args )
+# void start_proxy_server( no args )
 # Description:
 # Starts the TCP proxy server, and listens for incoming socket connections.
 # For each client that connects, spawn a new client socket connection and client_connect
@@ -97,7 +97,7 @@ def start_proxy_server():
     print("New Connection: " + "Date & Time, From " + client_ip + ':' + client_port)
     Thread( target=proxy_listener, args=(clientSock,client_ip,client_port) ).start()
 
-# void client_connect( arg1=socket,arg2=string,arg3=int )
+# void proxy_listener( arg1=socket,arg2=string,arg3=int )
 # Description:
 # This is the primary listener function for the proxy server, listens for TCP data
 # packets from the client socket, and TCP data packets from the dest server socket
