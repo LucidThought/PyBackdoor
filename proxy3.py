@@ -60,7 +60,7 @@ def main():
 
 # void method: set_log_mode( arg1=string )
 # Description:
-# helper function to set the proxy log mode
+# helper function to set the proxy log mode.
 def set_log_mode(log_command):
   if log_command == "-raw":
     mode = 1
