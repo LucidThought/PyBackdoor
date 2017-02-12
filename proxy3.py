@@ -161,9 +161,10 @@ def log_request(data,mode):
     print(symbol + symbol_format)
 
   elif LOG_MODE == 2:
-    print("Port logger -strip mode not implemented")
+#    print("Port logger -strip mode not implemented")
+    symbol_format = "".join(c for c in str(data,"utf-8","ignore") if c.isprintable()) # THIS DOESN'T WORK only strips non-prinatble characters
+    print(symbol_format)
     # Not implemented yet
-    # Unclear of what is meant by 'non-printable character'
     # UPDATE: See http://web.itu.edu.tr/sgunduz/courses/mikroisl/ascii.html for details on non-printable characters
 
   elif LOG_MODE == 3:
