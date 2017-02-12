@@ -33,14 +33,15 @@ def main():
   global PROXY_HOST
   global DST_HOST
   global LOG_MODE
+  global LOG_COMMAND
 
   PROXY_HOST = 'localhost' #server_host, always localhost.
 
   if len(sys.argv) == 5 or len(sys.argv) == 4:
 
     if len(sys.argv) == 5:
-      log_command = str(sys.argv[1])
-      set_log_mode(log_command)
+      LOG_COMMAND = str(sys.argv[1])
+      set_log_mode(LOG_COMMAND)
       PROXY_PORT = int(sys.argv[2])
       DST_HOST = str(sys.argv[3])
       DST_PORT  = int(sys.argv[4])
@@ -61,17 +62,17 @@ def main():
 # void set_log_mode( arg1=string )
 # Description:
 # helper function to set the proxy log mode.
-def set_log_mode(log_command):
-  if log_command == "-raw":
+def set_log_mode(LOG_COMMAND):
+  if LOG_COMMAND == "-raw":
     mode = 1
     print("-raw mode logging enabled")
-  if log_command == "-strip":
+  if LOG_COMMAND == "-strip":
     mode = 2
     print("-strip mode logging enabled")
-  if log_command == "-hex":
+  if LOG_COMMAND == "-hex":
     mode = 3
     print("-hex mode logging enabled")
-  if log_command == "-autoN":
+  if LOG_COMMAND == "-autoN":
     mode = 4
     print("-autoN mode logging enabled")
 
@@ -139,6 +140,7 @@ def proxy_listener(clientSock,client_ip,client_port):
 def log_request(data,mode):
   
   global LOG_MODE
+  global LOG_COMMAND
 
   if mode == 0: #no data
     symbol = "" 
@@ -154,7 +156,9 @@ def log_request(data,mode):
       # converted into string. You may need to change this when printing out in 
       # the other modes? https://docs.python.org/3/howto/unicode.html very useful page
       # only if your converting from UNI Code (byte string) to string
-    print( symbol + str(data,'utf-8',"ignore") )
+#    print( symbol + str(data,'utf-8',"ignore"))
+    symbol_format = str.replace(str(data,'utf-8',"ignore"), "\r\n", ("\n\r{}".format(symbol)))
+    print(symbol + symbol_format)
 
   elif LOG_MODE == 2:
     print("Port logger -strip mode not implemented")
