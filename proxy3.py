@@ -15,6 +15,7 @@ import sys
 import string
 from threading import Thread
 from functools import reduce
+from datetime import datetime
 
 PROXY_PORT = 0
 DST_PORT = 0
@@ -77,6 +78,9 @@ def set_log_mode(LOG_COMMAND):
   elif LOG_COMMAND == "-autoN":
     mode = 4
     print("-autoN mode logging enabled")
+  else:
+    mode = 1
+    print("Invalid Input for mode, default at -raw")
   LOG_MODE = mode	
 
 # void start_proxy_server( no args )
@@ -98,7 +102,7 @@ def start_proxy_server():
     client_ip = str(addr[0])
     client_port = str(addr[1])
     client_ip,client_port = str(addr[0]),str(addr[1])
-    print("New Connection: " + "Date & Time, From " + client_ip + ':' + client_port)
+    print("New Connection: " + datetime.now().isoformat(sep=' ') + " From " + client_ip + ':' + client_port)
     Thread( target=proxy_listener, args=(clientSock,client_ip,client_port) ).start()
 
 # void proxy_listener( arg1=socket,arg2=string,arg3=int )
@@ -164,28 +168,15 @@ def log_request(data,mode):
     print(symbol + symbol_format)
 
   elif LOG_MODE == 2:
-#    print("Port logger -strip mode not implemented")
-    symbol_format = str.replace(str(data,'utf-8',"ignore"), "\n", ("\n{}".format(symbol)))
-#    for c, r in {'':'.',}.items(): INCOMPLETE
-    print(symbol_format)
-    # Not implemented yet
+    # isprintable() include characters in the ascii range 32-127
+    # New line characters are, officially, not printable
     # UPDATE: See http://web.itu.edu.tr/sgunduz/courses/mikroisl/ascii.html for details on non-printable characters
+    symbol_format = str(data,'utf-8',"ignore")
+    symbol_format = ''.join(c if c.isprintable() else '.' for c in symbol_format)
+    print(symbol + "\n" + symbol_format)
     # FILTER=''.join([(len(repr(chr(x)))==3) and chr(x) or '.' for x in range(256)])
 
   elif LOG_MODE == 3:
-    # print("Port logger -hex mode not implemented")
-    # Not Implemented yet
-    # this is going to be hard. you can run "cat proxy3.py | hexdump -C" to see what it looks like
-#    separate = '.'
-#    length = 16
-#    counter = 0
-#    for i in xrange(0, len(data), length):
-#      d,data = data[:length],data[length:]
-#      hexval = ' '.join(["%02X"%ord(chr(x)) for x in d])
-#      d = d.translate(FILTER)
-#      output.append("%04X   %-*s   %s\n"%(counter,length*3,hexval,d))
-#    print(output)
-
     symbol_format = str(data, 'utf-8', "ignore")
 #    print(reduce(lambda x,y:x+y+" ", map(lambda p:("0" if ord(p)<=0xf else "")+hex(ord(p))[2:],symbol_format), ""))
     print(hexdump(symbol_format))
@@ -199,30 +190,27 @@ def log_request(data,mode):
     # loop (while there is still data to print)
     #   loop (while counter < N)
 
-# The following function was taken from https://gist.github.com/ImmortalPC/c340564823f283fe530b
-def hexdump(src, length=16, sep='.'):
-  result = [];
-  # Python3 support
-  try:
-    xrange(0,1);
-  except NameError:
-    xrange = range;
+# The following function was adapted from https://gist.github.com/ImmortalPC/c340564823f283fe530b
+def hexdump(src):
+  dump = [];
+  length = 16
+  separate = '.'
 
-  for i in xrange(0, len(src), length):
+  for i in range(0, len(src), length):
     subSrc = src[i:i+length];
-    hexa = '';
+    hexvals = '';
     isMiddle = False;
-    for h in xrange(0,len(subSrc)):
+    for h in range(0,len(subSrc)):
       if h == length/2:
-        hexa += ' ';
+        hexvals += ' ';
       h = subSrc[h];
       if not isinstance(h, int):
         h = ord(h);
       h = hex(h).replace('0x','');
       if len(h) == 1:
         h = '0'+h;
-      hexa += h+' ';
-    hexa = hexa.strip(' ');
+      hexvals += h+' ';
+    hexvals = hexvals.strip(' ');
     text = '';
     for c in subSrc:
       if not isinstance(c, int):
@@ -230,10 +218,10 @@ def hexdump(src, length=16, sep='.'):
       if 0x20 <= c < 0x7F:
         text += chr(c);
       else:
-        text += sep;
-    result.append(('%08X:  %-'+str(length*(2+1)+1)+'s  |%s|') % (i, hexa, text));
+        text += separate;
+    dump.append(('%08X:  %-'+str(length*(2+1)+1)+'s  |%s|') % (i, hexvals, text));
 
-  return '\n'.join(result);
+  return '\n'.join(dump);
 
 # client_connect( arg1=socket), returns byte String (Unicode)
 # Description:
