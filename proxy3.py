@@ -163,7 +163,8 @@ def log_request(data,mode):
   elif LOG_MODE == 2:
     print("Port logger -strip mode not implemented")
     # Not implemented yet
-    # Unclear of what is meant by 'non-printable character'. Are newline and return carriage characters non-printable? they do get printed...
+    # Unclear of what is meant by 'non-printable character'
+    # UPDATE: See http://web.itu.edu.tr/sgunduz/courses/mikroisl/ascii.html for details on non-printable characters
 
   elif LOG_MODE == 3:
     print("Port logger -hex mode not implemented")
