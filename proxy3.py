@@ -163,14 +163,21 @@ def log_request(data,mode):
   elif LOG_MODE == 2:
     print("Port logger -strip mode not implemented")
     # Not implemented yet
+    # Unclear of what is meant by 'non-printable character'. Are newline and return carriage characters non-printable? they do get printed...
 
   elif LOG_MODE == 3:
     print("Port logger -hex mode not implemented")
     # Not Implemented yet
+    # this is going to be hard. you can run "cat proxy3.py | hexdump -C" to see what it looks like
 
   elif LOG_MODE == 4:
     print("Port logger -AutoN mode not implemented")
-    # Not implemented yet    
+    # Not implemented yet
+    # I made LOG_COMMAND into a global because we'll need to parse each 'data' string into N-byte segments, separated by newline characters
+    # We'll likely have to step through each data string character by character and count to N in a nested loop
+    ## In the below example we'll have to fill empty space at the end of the data string with empty spaces
+    # loop (while there is still data to print)
+    #   loop (while counter < N)
 
 # client_connect( arg1=socket), returns byte String (Unicode)
 # Description:
