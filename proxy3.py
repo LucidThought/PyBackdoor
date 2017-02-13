@@ -16,6 +16,7 @@ import string
 from threading import Thread
 from functools import reduce
 from datetime import datetime
+from binascii import hexlify
 
 PROXY_PORT = 0
 DST_PORT = 0
@@ -75,7 +76,7 @@ def set_log_mode(LOG_COMMAND):
   elif LOG_COMMAND == "-hex":
     mode = 3
     print("-hex mode logging enabled")
-  elif LOG_COMMAND == "-autoN":
+  elif LOG_COMMAND.startswith("-auto"):
     mode = 4
     print("-autoN mode logging enabled")
   else:
@@ -189,38 +190,60 @@ def log_request(data,mode):
     ## In the below example we'll have to fill empty space at the end of the data string with empty spaces
     # loop (while there is still data to print)
     #   loop (while counter < N)
+    numBytes = LOG_COMMAND[5:]
+    counter = 0
+    if (numBytes.isdigit()==False):
+      print("Invalid number of bytes for -autoN, defaulting to 16-byte lines")
+      numBytes = 16
+    packet = str(data,'utf-8',"ignore")
+    symbol_format = []
+    for i in range(0,len(packet),int(numBytes)):
+      line = packet[i:i+int(numBytes)]
+      text = ''
+      for c in line:
+        if not isinstance(c, int):
+          c = ord(c)
+        if 0x20 <= c < 0x7F:
+          text += chr(c)
+        else:
+          text += hex(c).replace('0x','\\')
+      text += '\n'
+      symbol_format.append(text)
+    print(''.join(symbol_format))
+        
+      
 
 # The following function was adapted from https://gist.github.com/ImmortalPC/c340564823f283fe530b
 def hexdump(src):
-  dump = [];
+  dump = []
   length = 16
   separate = '.'
 
   for i in range(0, len(src), length):
-    subSrc = src[i:i+length];
-    hexvals = '';
+    subSrc = src[i:i+length]
+    hexvals = ''
     for h in range(0,len(subSrc)):
       if h == length/2:
-        hexvals += ' ';
-      h = subSrc[h];
+        hexvals += ' '
+      h = subSrc[h]
       if not isinstance(h, int):
-        h = ord(h);
-      h = hex(h).replace('0x','');
+        h = ord(h)
+      h = hex(h).replace('0x','')
       if len(h) == 1:
-        h = '0'+h;
-      hexvals += h+' ';
-    hexvals = hexvals.strip(' ');
-    text = '';
+        h = '0'+h
+      hexvals += h+' '
+    hexvals = hexvals.strip(' ')
+    text = ''
     for c in subSrc:
       if not isinstance(c, int):
-        c = ord(c);
+        c = ord(c)
       if 0x20 <= c < 0x7F:
-        text += chr(c);
+        text += chr(c)
       else:
-        text += separate;
-    dump.append(('%08X:  %-'+str(length*(2+1)+1)+'s  |%s|') % (i, hexvals, text));
+        text += separate
+    dump.append(('%08X:  %-'+str(length*(2+1)+1)+'s  |%s|') % (i, hexvals, text))
 
-  return '\n'.join(dump);
+  return '\n'.join(dump)
 
 # client_connect( arg1=socket), returns byte String (Unicode)
 # Description:
