@@ -179,17 +179,10 @@ def log_request(data,mode):
 
   elif LOG_MODE == 3:
     symbol_format = str(data, 'utf-8', "ignore")
-#    print(reduce(lambda x,y:x+y+" ", map(lambda p:("0" if ord(p)<=0xf else "")+hex(ord(p))[2:],symbol_format), ""))
+    # print(reduce(lambda x,y:x+y+" ", map(lambda p:("0" if ord(p)<=0xf else "")+hex(ord(p))[2:],symbol_format), ""))
     print(hexdump(symbol_format))
 
   elif LOG_MODE == 4:
-    print("Port logger -AutoN mode not implemented")
-    # Not implemented yet
-    # I made LOG_COMMAND into a global because we'll need to parse each 'data' string into N-byte segments, separated by newline characters
-    # We'll likely have to step through each data string character by character and count to N in a nested loop
-    ## In the below example we'll have to fill empty space at the end of the data string with empty spaces
-    # loop (while there is still data to print)
-    #   loop (while counter < N)
     numBytes = LOG_COMMAND[5:]
     counter = 0
     if (numBytes.isdigit()==False):
