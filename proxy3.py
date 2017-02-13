@@ -192,7 +192,7 @@ def log_request(data,mode):
     symbol_format = []
     for i in range(0,len(packet),int(numBytes)):
       line = packet[i:i+int(numBytes)]
-      text = ''
+      text = symbol
       for c in line:
         if not isinstance(c, int):
           c = ord(c)
