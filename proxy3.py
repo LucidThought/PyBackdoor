@@ -249,9 +249,6 @@ def get_data(socket):
 
     buff_size = 4096
     time_out = 5
-    ####### BUG found out here, need to convert the data to a 
-    ####### byte string by putting b before it.
-    ####### convert this later to regular string if need be.
     data_buffer = b''
     socket.settimeout(5)
     try:
