@@ -199,7 +199,6 @@ def hexdump(src):
   for i in range(0, len(src), length):
     subSrc = src[i:i+length];
     hexvals = '';
-    isMiddle = False;
     for h in range(0,len(subSrc)):
       if h == length/2:
         hexvals += ' ';
