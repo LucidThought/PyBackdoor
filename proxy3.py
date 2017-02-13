@@ -1,5 +1,8 @@
 #!/usr/bin/python3
 
+# CPSC 526 - Assignment 2
+# Written By: Justin Berry, Andrew Lata
+
 # HOW TO USE
 # 1. Launch server
 #    $python3 proxy3.py -raw <port> www.google.ca 80 
@@ -48,7 +51,6 @@ def main():
       PROXY_PORT = int(sys.argv[2])
       DST_HOST = str(sys.argv[3])
       DST_PORT  = int(sys.argv[4])
-#      LOG_MODE = 1  #hard coding raw here regardless of what -arg is entered
     
     if len(sys.argv) == 4:
       PROXY_PORT = int(sys.argv[1])
@@ -164,7 +166,6 @@ def log_request(data,mode):
       # converted into string. You may need to change this when printing out in 
       # the other modes? https://docs.python.org/3/howto/unicode.html very useful page
       # only if your converting from UNI Code (byte string) to string
-#    print( symbol + str(data,'utf-8',"ignore"))
     symbol_format = str.replace(str(data,'utf-8',"ignore"), "\n", ("\n{}".format(symbol)))
     print(symbol + symbol_format)
 
@@ -204,9 +205,11 @@ def log_request(data,mode):
       symbol_format.append(text)
     print(''.join(symbol_format))
         
-      
-
-# The following function was adapted from https://gist.github.com/ImmortalPC/c340564823f283fe530b
+# String hexdump (arg1=network data in utf-8)      
+# Description:
+# This funtion compiles the output for each captured packet in the hexdump format
+# Each packet is indexed individually in the leftmost column
+# This function was adapted from https://gist.github.com/ImmortalPC/c340564823f283fe530b
 def hexdump(src):
   dump = []
   length = 16
